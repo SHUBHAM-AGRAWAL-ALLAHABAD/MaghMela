@@ -18,7 +18,8 @@ RUN npm ci \
 FROM php:8.2-cli-alpine
 
 WORKDIR /app
-# 2) Install system deps + PHP extensions
+
+# 2) Install system deps + PHP extensions (pdo_pgsql के लिए postgresql-dev ज़रूरी)
 RUN apk update \
  && apk add --no-cache \
       git \
@@ -26,35 +27,31 @@ RUN apk update \
       unzip \
       libzip-dev \
       oniguruma-dev \
-      postgresql-dev          \
+      postgresql-dev \
  && docker-php-ext-install \
       pdo_mysql \
-      pdo_pgsql \            # ← जोड़ा
+      pdo_pgsql \
       mbstring \
-      bcmath  \
+      bcmath \
       zip \
  && rm -rf /var/cache/apk/*
 
-
-# Composer
+# 3) Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy built assets from node-builder
+# 4) Built assets from node-builder
 COPY --from=node-builder /app/public/build public/build
 
-# अब बाकि सारा PHP project copy करें
+# 5) बाकी का PHP project
 COPY . .
 
-# Env
+# 6) Env फ़ाइल
 RUN cp .env.example .env
 
-# PHP deps, key & cache
+# 7) PHP deps install, key generate
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
  && php artisan key:generate --ansi --force
 
+# 8) पोर्ट और CMD
 EXPOSE 10000
-
-CMD ["sh","-c","set -e; \
-    echo 'Migrating...'; php artisan migrate --force; \
-    echo 'Caching config/views...'; php artisan config:cache && php artisan view:cache; \
-    echo 'Starting server...'; exec php artisan serve --host=0.0.0.0 --port=${PORT}"]
+CMD ["sh","-c","php artisan migrate --force && php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT}"]
