@@ -32,8 +32,8 @@
                                 <label class="form-label">Type *</label>
                                 <select name="type" id="eventType" class="form-control">
                                     <option value="">--select--</option>
-                                    <option value="Feature">Feature</option>
-                                    <option value="Recent">Recent</option>
+                                    <option value="English">English Guide</option>
+                                    <option value="Hindi">Hindi Guide</option>
                                 </select>
                             </div>
                             <div class="col-6 p-1">

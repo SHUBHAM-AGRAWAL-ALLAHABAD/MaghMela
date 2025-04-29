@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-2xl mx-auto my-12 p-8 bg-white rounded-2xl shadow-lg">
+<div class="max-w-2xl mx-auto my-12 p-8 bg-blue-100  rounded-2xl shadow-lg">
   {{-- परिचय --}}
-  <div class="mb-8 text-center">
+  <div class="mb-8 text-center border-gray-600">
     <h1 class="text-3xl font-extrabold text-gray-800 mb-2">
       Partner with PrayagrajMaghMela
     </h1>
@@ -16,14 +16,14 @@
   </div>
 
   {{-- फॉर्म बॉक्स --}}
-  <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+  <div class="bg-gray-50 p-6 rounded-xl border border-gray-600">
     @if(session('success'))
       <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
         {{ session('success') }}
       </div>
     @endif
 
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Firm Enquiry Form</h2>
+    <h2 class="text-2xl text-center font-semibold text-gray-800 mb-6">Firm Enquiry Form</h2>
 
     <form action="{{ route('firm-enquiry.store') }}" method="POST" class="space-y-6">
       @csrf

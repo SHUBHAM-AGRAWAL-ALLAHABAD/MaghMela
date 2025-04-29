@@ -36,14 +36,17 @@ Route::post('/enquiry', [EnquiryController::class, 'submit'])
 
 /*
 |--------------------------------------------------------------------------
-| Home & Event registration
+| Home & Event registration*****************************************************************************
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', [HomeController::class, 'IndexPage'])->name('home');
-Route::get('/post/{id}', [HomeController::class, 'PostPage'])
-     ->name('home.post');
-Route::post('/event-registration', [HomeController::class, 'EventRegistration'])
-     ->name('event.register');
+
+
+// Route::get('/post/{id}', [HomeController::class, 'PostPage'])
+//      ->name('home.post');
+// Route::post('/event-registration', [HomeController::class, 'EventRegistration'])
+//      ->name('event.register');
 
 /*
 |--------------------------------------------------------------------------
@@ -69,13 +72,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])
          ->name('posts.destroy');
 
-    // Breeze profile management
+    // Breeze profile management*****************************************************************************
     Route::get('/profile', [ProfileController::class, 'edit'])
          ->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])
          ->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])
          ->name('profile.destroy');
+
+
 
     // Dashboard (needs verified email)
     Route::get('/dashboard', function () {
@@ -101,9 +106,12 @@ Route::get('/posts/{id}', [PostController::class, 'show'])
 Route::get('/firm-enquiry', [FirmEnquiryController::class, 'create'])
      ->name('firm-enquiry.create');
 
+
 // Handle form submit
 Route::post('/firm-enquiry', [FirmEnquiryController::class, 'store'])
      ->name('firm-enquiry.store');
+
+
 
 // List all firm-enquiries (only for logged-in users)
 Route::middleware('auth')->group(function () {
