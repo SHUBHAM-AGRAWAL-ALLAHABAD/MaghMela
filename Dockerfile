@@ -15,6 +15,9 @@ RUN npm ci \
 # -----------------------
 FROM php:8.2-cli-alpine
 
+# ✅ Port for Railway
+ENV PORT=10000
+
 WORKDIR /app
 
 RUN apk update \
@@ -26,7 +29,6 @@ RUN apk update \
       oniguruma-dev \
       postgresql-dev \
  && docker-php-ext-install \
-      pdo_mysql \
       pdo_pgsql \
       mbstring \
       bcmath \
@@ -36,19 +38,22 @@ RUN apk update \
 # Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 1) पहले पूरा PHP प्रोजेक्ट कॉपी करें
+# ✅ Copy full Laravel project
 COPY . .
 
-# 2) फिर node-builder से built assets को public/build में ओवरराइड करें
+# ✅ Override Vite build output
 COPY --from=node-builder /app/public/build ./public/build
 
-# Env फ़ाइल
+# ✅ Copy .env if needed
 RUN cp .env.example .env
 
-# PHP dependencies & app key
+# ✅ Install PHP deps & generate key
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
  && php artisan key:generate --ansi --force
 
+# ✅ Set folder permissions
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+
 EXPOSE 10000
 
-CMD ["sh","-c","php artisan migrate --force && php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT}"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT}"]
