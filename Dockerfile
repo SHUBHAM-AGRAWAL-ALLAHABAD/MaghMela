@@ -1,5 +1,5 @@
 # 1) Alpine-base PHP 8.1 CLI
-FROM php:8.1-cli-alpine
+FROM php:8.2-cli-alpine
 
 # 2) वर्किंग डायरेक्टरी
 WORKDIR /app
