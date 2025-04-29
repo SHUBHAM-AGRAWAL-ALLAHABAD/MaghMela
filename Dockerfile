@@ -1,10 +1,10 @@
-# 1) Alpine-base PHP 8.1 CLI
+# Use PHP 8.2 CLI on Alpine
 FROM php:8.2-cli-alpine
 
-# 2) वर्किंग डायरेक्टरी
+# 1) Set working dir
 WORKDIR /app
 
-# 3) सिस्टम डिप्स इंस्टॉल करो
+# 2) Install system deps + PHP extensions
 RUN apk update \
  && apk add --no-cache \
     git \
@@ -13,30 +13,22 @@ RUN apk update \
     libzip-dev \
     oniguruma-dev \
  && docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    bcmath \
-    zip \
+    pdo_mysql mbstring bcmath zip \
  && rm -rf /var/cache/apk/*
 
-# 4) Composer binary copy from official composer image
+# 3) Install Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 5) Composer dependencies (cache leverage के लिए)
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# 6) बाकी का कोड कॉपी करो
+# 4) Copy your entire project (including artisan, vendor stub, etc)
 COPY . .
 
-# 7) Laravel cache & key gen
-RUN php artisan key:generate --ansi --force \
+# 5) Install PHP deps, generate key & cache
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+ && php artisan key:generate --ansi --force \
  && php artisan config:cache \
  && php artisan route:cache \
  && php artisan view:cache
 
-# 8) Port exposição (DOCUMENTATION only)
+# 6) Document the port and start on whatever PORT Render injects
 EXPOSE 10000
-
-# 9) Serve on whatever ${PORT} Render सेट करता है
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
