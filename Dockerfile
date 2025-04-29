@@ -25,8 +25,9 @@ RUN php artisan key:generate --ansi --force \
  && php artisan route:cache \
  && php artisan view:cache
 
-# Expose Laravel’s dev server port
+
+# Expose for documentation only (not strictly required)
 EXPOSE 10000
 
-# Start Laravel’s built-in server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
+# Use PHP’s built‐in server and listen on whatever PORT Render sets
+CMD ["sh", "-lc", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
