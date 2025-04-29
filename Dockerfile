@@ -1,39 +1,50 @@
-# Use PHP 8.2 CLI on Alpine
-FROM php:8.2-cli-alpine
-
-# 1) Set working dir
+# -----------------------
+# 1) Node stage: build assets
+# -----------------------
+FROM node:18-alpine AS node-builder
 WORKDIR /app
 
-# 2) Install system deps + PHP extensions (PDO MySQL + PDO PgSQL दोनों)
+# केवल package.json, vite.config.js, resources फ़ोल्डर copy करें
+COPY package.json package-lock.json vite.config.js ./
+COPY resources resources
+
+# Install & build
+RUN npm ci \
+ && npm run build
+
+# -----------------------
+# 2) PHP stage: run app
+# -----------------------
+FROM php:8.2-cli-alpine
+
+WORKDIR /app
+
+# System deps + PHP extensions
 RUN apk update \
  && apk add --no-cache \
-    git \
-    zip \
-    unzip \
-    libzip-dev \
-    oniguruma-dev \
-    postgresql-dev \
- && docker-php-ext-install \
-    pdo_mysql \
-    pdo_pgsql \
-    mbstring \
-    bcmath \
-    zip \
+      git zip unzip libzip-dev oniguruma-dev \
+ && docker-php-ext-install pdo_mysql mbstring bcmath zip \
  && rm -rf /var/cache/apk/*
 
-# 3) Install Composer binary
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4) Copy entire project & setup .env
+# Copy built assets from node-builder
+COPY --from=node-builder /app/public/build public/build
+
+# अब बाकि सारा PHP project copy करें
 COPY . .
+
+# Env
 RUN cp .env.example .env
 
-# 5) Install PHP deps & generate key (बिल्ड टाइम में सिर्फ़ यहीं कैश)
+# PHP deps, key & cache
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
  && php artisan key:generate --ansi --force
 
-# 6) Document the port
 EXPOSE 10000
 
-# 7) कंटेनर स्टार्ट होते ही पहले migrate, फिर cache, फिर serve करें
-CMD ["sh","-c","php artisan migrate --force && php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT}"]
+CMD ["sh","-c","set -e; \
+    echo 'Migrating...'; php artisan migrate --force; \
+    echo 'Caching config/views...'; php artisan config:cache && php artisan view:cache; \
+    echo 'Starting server...'; exec php artisan serve --host=0.0.0.0 --port=${PORT}"]
