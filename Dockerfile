@@ -23,17 +23,24 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 RUN cp .env.example .env
 
-# 5) Install PHP deps, generate key & cache
+
+
+
+ # 5) Install PHP deps, generate key (लेकिन बिल्ड टाइम में कोई कैश नहीं बनाना)
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
-&& php artisan key:generate --ansi --force \
-&& php artisan config:cache \
-&& php artisan view:cache
+&& php artisan key:generate --ansi --force
+
 
 # 6) Document the port and start on whatever PORT Render injects
 # … बाकी सब वैसा ही रहने दें …
 
+
 # Expose for documentation
 EXPOSE 10000
 
-# Startups में माईग्रेट करवा दो, फिर सर्व करो
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}"]
+CMD ["sh", "-c",
+  "php artisan migrate --force \
+   && php artisan config:cache \
+   && php artisan view:cache \
+   && php artisan serve --host=0.0.0.0 --port=${PORT}"
+]
