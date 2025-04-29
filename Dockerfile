@@ -25,10 +25,9 @@ RUN cp .env.example .env
 
 # 5) Install PHP deps, generate key & cache
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
- && php artisan key:generate --ansi --force \
- && php artisan config:cache \
- && php artisan route:cache \
- && php artisan view:cache
+&& php artisan key:generate --ansi --force \
+&& php artisan config:cache \
+&& php artisan view:cache
 
 # 6) Document the port and start on whatever PORT Render injects
 EXPOSE 10000
