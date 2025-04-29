@@ -30,5 +30,10 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction \
 && php artisan view:cache
 
 # 6) Document the port and start on whatever PORT Render injects
+# … बाकी सब वैसा ही रहने दें …
+
+# Expose for documentation
 EXPOSE 10000
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
+
+# Startups में माईग्रेट करवा दो, फिर सर्व करो
+CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}"]
