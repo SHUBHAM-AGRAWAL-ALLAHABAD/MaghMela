@@ -21,6 +21,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # 4) Copy your entire project (including artisan, vendor stub, etc)
 COPY . .
+RUN cp .env.example .env
 
 # 5) Install PHP deps, generate key & cache
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
