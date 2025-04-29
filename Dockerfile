@@ -18,13 +18,23 @@ RUN npm ci \
 FROM php:8.2-cli-alpine
 
 WORKDIR /app
-
-# System deps + PHP extensions
+# 2) Install system deps + PHP extensions
 RUN apk update \
  && apk add --no-cache \
-      git zip unzip libzip-dev oniguruma-dev \
- && docker-php-ext-install pdo_mysql mbstring bcmath zip \
+      git \
+      zip \
+      unzip \
+      libzip-dev \
+      oniguruma-dev \
+      postgresql-dev          \
+ && docker-php-ext-install \
+      pdo_mysql \
+      pdo_pgsql \            # ← जोड़ा
+      mbstring \
+      bcmath  \
+      zip \
  && rm -rf /var/cache/apk/*
+
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
